@@ -9,20 +9,42 @@ from firebase_admin import credentials, firestore
 # Deficit Map: G_gap (Squad Deficit Urgency by Position)
 # Simulates Agent B: The "General Manager" output
 SQUAD_DEFICIT_MAP = {
-    "GOALKEEPER": 0.3,
-    "FULLBACK": 0.6,
-    "CENTER_BACK": 0.9,     # Urgent need! e.g., lost 3-0, bad aerial duels
+    "GOALKEEPER": 0.5,
+    "FULLBACK": 0.5,
+    "CENTER_BACK": 0.5,     # Urgent need! e.g., lost 3-0, bad aerial duels
     "MIDFIELDER": 0.5,
-    "WINGER": 0.7,
-    "ATTACKER": 0.8
+    "WINGER": 0.5,
+    "ATTACKER": 0.5
 }
+
+# Season filter (2025-2026 season IDs)
+# Add the specific Sportmonks season IDs for the leagues you are scouting here.
+TARGET_SEASON_IDS = {25536, 25438, 25598} # Examples from your dataset. Set to None to disable filtering.
 
 # Team Weaknesses for Complementary Factor calculation
 # Simulates Agent C's logic mapping prospect strengths to U Cluj weaknesses
 TEAM_WORST_STATS = {
-    "AERIALS_WON": True,
-    "CROSSES": True,
-    "KEY_PASSES": False
+    "Saves": False,             # U Cluj's goalkeeping is shaky
+    "Saves Insidebox": False,
+    "Cleansheets": False,
+    "Accurate Passes Percentage": False,
+    "Accurate Passes": False,
+    "Long Balls Won": False,
+    "Clearances": False,
+    "Duels Won Percentage": False,
+    "Interceptions": False,
+    "Ball Recovery": False,
+    "Passes In Final Third": False,
+    "Successful Crosses Percentage": False,
+    "Accurate Crosses": False,
+    "Successful Dribbles": False,
+    "Key Passes": False,
+    "Chances Created": False,
+    "Shots Blocked": False,
+    "Shots On Target": False,
+    "Aerials Won Percentage": False,
+    "Tacles Won Percentage": False,
+    "Tackles Won Percentage": False,
 }
 
 def normalize_stat(value, max_expected):
@@ -35,48 +57,132 @@ def calculate_bpi(position_code, stats_dict):
     """
     Calculate the Base Performance Index (BPI): ∑(Stat_i × Weight_i)
     """
-    bpi = 0.0
-    
-    goals = stats_dict.get("GOALS", 0)
-    assists = stats_dict.get("ASSISTS", 0)
-    saves = stats_dict.get("SAVES", 0)
-    clean_sheets = stats_dict.get("CLEAN_SHEETS", 0)
-    interceptions = stats_dict.get("INTERCEPTIONS", 0)
-    tackles = stats_dict.get("TACKLES", 0)
-    aerials_won = stats_dict.get("AERIALS_WON", 0)
-    key_passes = stats_dict.get("KEY_PASSES", 0)
-    passes_accuracy = stats_dict.get("PASSES_ACCURACY", 70) 
-    dribbles = stats_dict.get("DRIBBLES_SUCCESSFUL", 0)
-    shots_on_target = stats_dict.get("SHOTS_ON_TARGET", 0)
-
-    n_goals = normalize_stat(goals, 20)
-    n_assists = normalize_stat(assists, 15)
-    n_saves = normalize_stat(saves, 100)
-    n_clean_sheets = normalize_stat(clean_sheets, 15)
-    n_interceptions = normalize_stat(interceptions, 50)
-    n_tackles = normalize_stat(tackles, 80)
-    n_aerials_won = normalize_stat(aerials_won, 100)
-    n_key_passes = normalize_stat(key_passes, 50)
-    n_passes_accuracy = passes_accuracy 
-    n_dribbles = normalize_stat(dribbles, 60)
-    n_shots_on_target = normalize_stat(shots_on_target, 40)
-
     position_code = position_code.upper()
     
+    # --- STRICT DATA COMPLETENESS CHECK ---
+    required_stats = []
     if "GOALKEEPER" in position_code:
-        bpi = (0.35 * n_saves) + (0.25 * n_passes_accuracy) + (0.20 * n_clean_sheets) + (0.20 * 80)
+        required_stats = ["Saves", "Saves Insidebox", "Cleansheets", "Accurate Passes Percentage", "Accurate Passes", "Long Balls Won", "Clearances"]
     elif "FULLBACK" in position_code or "WINGBACK" in position_code:
-        bpi = (0.25 * 75) + (0.25 * n_key_passes) + (0.30 * n_tackles) + (0.20 * n_interceptions)
+        required_stats = ["Duels Won Percentage", "Interceptions", "Ball Recovery", "Accurate Passes Percentage", "Passes In Final Third", "Successful Crosses Percentage", "Accurate Crosses", "Successful Dribbles", "Key Passes"]
+        # Handle typo variant gracefully for tackles
+        if "Tacles Won Percentage" not in stats_dict and "Tackles Won Percentage" not in stats_dict:
+            return None
     elif "CENTER_BACK" in position_code or "DEFENDER" in position_code:
-        bpi = (0.35 * n_aerials_won) + (0.25 * n_interceptions) + (0.20 * n_passes_accuracy) + (0.20 * n_tackles)
+        required_stats = ["Duels Won Percentage", "Aerials Won Percentage", "Clearances", "Interceptions", "Shots Blocked", "Accurate Passes Percentage", "Long Balls Won"]
     elif "MIDFIELDER" in position_code:
-        bpi = (0.30 * n_key_passes) + (0.25 * n_interceptions) + (0.25 * n_dribbles) + (0.20 * n_passes_accuracy)
+        required_stats = ["Accurate Passes Percentage", "Passes In Final Third", "Duels Won Percentage", "Ball Recovery", "Interceptions", "Key Passes", "Chances Created", "Successful Dribbles"]
     elif "WINGER" in position_code:
-        bpi = (0.30 * n_dribbles) + (0.25 * ((n_goals + n_assists) / 2)) + (0.25 * 80) + (0.20 * n_tackles)
+        required_stats = ["Successful Dribbles", "Chances Created", "Accurate Passes Percentage", "Successful Crosses Percentage", "Accurate Crosses", "Ball Recovery"]
     elif "ATTACKER" in position_code or "STRIKER" in position_code:
-        bpi = (0.40 * n_goals) + (0.20 * n_shots_on_target) + (0.20 * n_aerials_won) + (0.20 * n_passes_accuracy)
+        required_stats = ["Shots On Target", "Aerials Won Percentage", "Duels Won Percentage", "Accurate Passes Percentage", "Key Passes"]
     else:
-        bpi = (n_goals + n_assists + n_interceptions + n_tackles) / 4
+        required_stats = ["Accurate Passes Percentage", "Interceptions"]
+
+    for stat in required_stats:
+        if stat not in stats_dict:
+            return None
+
+    bpi = 0.0
+    
+    # Advanced Tactical Percentages (Default to 50 if missing)
+    pass_acc = stats_dict.get("Accurate Passes Percentage", 50.0)
+    tackle_win_pct = stats_dict.get("Tacles Won Percentage", stats_dict.get("Tackles Won Percentage", 50.0))
+    duel_win_pct = stats_dict.get("Duels Won Percentage", 50.0)
+    aerial_win_pct = stats_dict.get("Aerials Won Percentage", 50.0)
+    cross_acc = stats_dict.get("Successful Crosses Percentage", 30.0)
+    
+    # Calculate 'Per 90' factor. Force minimum 3 full matches (270 mins) to prevent 
+    # massive stat inflation for youth players who only played 10 minutes all season.
+    ninety_s = max(3.0, stats_dict.get("Minutes Played", 0) / 90.0)
+
+    # Volume metrics (Converted to Per 90 Minutes)
+    goals = stats_dict.get("Goals", 0) / ninety_s
+    assists = stats_dict.get("Assists", 0) / ninety_s
+    interceptions = stats_dict.get("Interceptions", 0) / ninety_s
+    clearances = stats_dict.get("Clearances", 0) / ninety_s
+    ball_recovery = stats_dict.get("Ball Recovery", 0) / ninety_s
+    key_passes = stats_dict.get("Key Passes", 0) / ninety_s
+    chances_created = stats_dict.get("Chances Created", 0) / ninety_s
+    dribbles = stats_dict.get("Successful Dribbles", 0) / ninety_s
+    blocked_shots = stats_dict.get("Shots Blocked", 0) / ninety_s
+    final_third_passes = stats_dict.get("Passes In Final Third", 0) / ninety_s
+    accurate_crosses = stats_dict.get("Accurate Crosses", 0) / ninety_s
+    long_balls_won = stats_dict.get("Long Balls Won", 0) / ninety_s
+    saves = stats_dict.get("Saves", 0) / ninety_s
+    clean_sheets = stats_dict.get("Cleansheets", 0) / ninety_s
+    shots_on_target = stats_dict.get("Shots On Target", 0) / ninety_s
+    saves_insidebox = stats_dict.get("Saves Insidebox", 0) / ninety_s
+    high_claims = stats_dict.get("Good High Claim", 0) / ninety_s
+    punches = stats_dict.get("Punches", 0) / ninety_s
+    errors = stats_dict.get("Error Lead To Goal", 0) / ninety_s
+    accurate_passes = stats_dict.get("Accurate Passes", 0) / ninety_s
+
+    # Normalizations (Targets updated to Per 90 World-Class maximums)
+    n_goals = normalize_stat(goals, 0.8)
+    n_assists = normalize_stat(assists, 0.5)
+    n_interceptions = normalize_stat(interceptions, 2.5)
+    n_clearances = normalize_stat(clearances, 5.0)
+    n_ball_recovery = normalize_stat(ball_recovery, 8.0)
+    n_key_passes = normalize_stat(key_passes, 2.5)
+    n_chances_created = normalize_stat(chances_created, 2.0)
+    n_dribbles = normalize_stat(dribbles, 3.5)
+    n_blocked_shots = normalize_stat(blocked_shots, 1.2)
+    n_final_third = normalize_stat(final_third_passes, 10.0)
+    n_acc_crosses = normalize_stat(accurate_crosses, 2.0)
+    n_long_balls = normalize_stat(long_balls_won, 4.0)
+    n_saves = normalize_stat(saves, 4.0)
+    n_clean_sheets = normalize_stat(clean_sheets, 0.4)
+    n_shots_on_target = normalize_stat(shots_on_target, 1.5)
+    n_saves_insidebox = normalize_stat(saves_insidebox, 2.5)
+    n_box_control = normalize_stat(high_claims + punches, 0.8)
+    n_dist_volume = normalize_stat(accurate_passes, 35.0)
+
+    if "GOALKEEPER" in position_code:
+        # GK Profile: Shot Stopping (40%), Distribution/Footwork (40%), Box Control/Set Pieces (20%)
+        shot_stopping = (n_saves * 0.4) + (n_saves_insidebox * 0.3) + (n_clean_sheets * 0.3)
+        distribution = (pass_acc * 0.5) + (n_dist_volume * 0.3) + (n_long_balls * 0.2)
+        box_control = (n_box_control * 0.7) + (n_clearances * 0.3)
+        
+        penalty = min(errors * 100.0, 15.0) # Up to -15 BPI deduction for error-proneness
+        bpi = (shot_stopping * 0.40) + (distribution * 0.40) + (box_control * 0.20) - penalty
+        
+    elif "FULLBACK" in position_code or "WINGBACK" in position_code:
+        # Fullback Profile: Def (35%), Build-up (40%), Off (25%)
+        defensive = (tackle_win_pct * 0.3) + (duel_win_pct * 0.3) + (n_interceptions * 0.2) + (n_ball_recovery * 0.2)
+        buildup = (pass_acc * 0.3) + (n_final_third * 0.3) + (cross_acc * 0.2) + (n_acc_crosses * 0.2)
+        offensive = (n_dribbles * 0.4) + (n_key_passes * 0.3) + (n_assists * 0.2) + (n_goals * 0.1)
+        bpi = (defensive * 0.35) + (buildup * 0.40) + (offensive * 0.25)
+        
+    elif "CENTER_BACK" in position_code or "DEFENDER" in position_code:
+        # Center Back Profile: Def (70%), Build-up (30%)
+        defensive = (duel_win_pct * 0.25) + (aerial_win_pct * 0.25) + (n_clearances * 0.2) + (n_interceptions * 0.15) + (n_blocked_shots * 0.15)
+        buildup = (pass_acc * 0.6) + (n_long_balls * 0.4)
+        bpi = (defensive * 0.70) + (buildup * 0.30)
+        
+    elif "MIDFIELDER" in position_code:
+        # Midfielder: Build-up (40%), Def (30%), Off (30%)
+        buildup = (pass_acc * 0.5) + (n_final_third * 0.5)
+        defensive = (duel_win_pct * 0.4) + (n_ball_recovery * 0.3) + (n_interceptions * 0.3)
+        offensive = (n_key_passes * 0.4) + (n_chances_created * 0.3) + (n_dribbles * 0.3)
+        bpi = (buildup * 0.40) + (defensive * 0.30) + (offensive * 0.30)
+        
+    elif "WINGER" in position_code:
+        # Winger: Off (60%), Build-up (30%), Def (10%)
+        offensive = (n_dribbles * 0.3) + (n_chances_created * 0.2) + (n_goals * 0.25) + (n_assists * 0.25)
+        buildup = (pass_acc * 0.4) + (cross_acc * 0.3) + (n_acc_crosses * 0.3)
+        defensive = n_ball_recovery
+        bpi = (offensive * 0.60) + (buildup * 0.30) + (defensive * 0.10)
+        
+    elif "ATTACKER" in position_code or "STRIKER" in position_code:
+        # Attacker: Scoring (60%), Target Man (20%), Link-up (20%)
+        scoring = (n_goals * 0.6) + (n_shots_on_target * 0.4)
+        target = (aerial_win_pct * 0.5) + (duel_win_pct * 0.5)
+        linkup = (pass_acc * 0.5) + (n_key_passes * 0.5)
+        bpi = (scoring * 0.60) + (target * 0.20) + (linkup * 0.20)
+        
+    else:
+        bpi = (n_goals + n_assists + n_interceptions + pass_acc) / 4
 
     return min(100.0, max(0.0, bpi))
 
@@ -90,18 +196,90 @@ def get_generalized_position(position_code):
     if "ATTACKER" in pos or "STRIKER" in pos: return "ATTACKER"
     return "UNKNOWN"
 
+def calculate_fit_rating(stats_dict):
+    """
+    Simulates Agent D: The "Coach's Persona" Filter.
+    Evaluates discipline, stamina, work-rate, and reliability.
+    Returns a score bounded between 0.0 and 20.0.
+    """
+    fit_score = 10.0  # Base neutral score
+    
+    minutes = stats_dict.get("Minutes Played", 0)
+    appearances = stats_dict.get("Appearances", 0)
+    yellows = stats_dict.get("Yellowcards", 0)
+    reds = stats_dict.get("Redcards", 0)
+    fouls = stats_dict.get("Fouls", 0)
+
+    # 1. Availability & Stamina (Up to +10 points)
+    if minutes > 2000:
+        fit_score += 10.0
+    elif minutes > 1000:
+        fit_score += 6.0
+    elif minutes > 500:
+        fit_score += 3.0
+        
+    # 2. Discipline & Reliability (Deductions)
+    penalty = (reds * 4.0) + (yellows * 0.5)
+    
+    if appearances > 0:
+        fouls_per_game = fouls / appearances
+        if fouls_per_game > 1.5:
+            penalty += 3.0  # Coach Sabău penalizes reckless foulers
+            
+    fit_score -= penalty
+    
+    return round(max(0.0, min(20.0, fit_score)), 2)
+
 def process_player_data(player):
     """Applies the new mathematical framework for Dynamic Rating and Synergy Score."""
     # --- Data Extraction ---
     stats_dict = {}
-    if player.get("statistics"):
-        for stat_season in player["statistics"]:
-            if stat_season.get("details"):
-                for detail in stat_season["details"]:
-                    dev_name = detail.get("type", {}).get("developer_name")
-                    val = detail.get("value", {}).get("total")
-                    if dev_name and val is not None:
-                        stats_dict[dev_name] = stats_dict.get(dev_name, 0) + val
+    processed_season_stat_ids = set()
+    processed_lineup_ids = set()
+
+    for stat_season in player.get("statistics", []):
+        season_id = stat_season.get("season_id")
+        if TARGET_SEASON_IDS and season_id not in TARGET_SEASON_IDS:
+            continue
+            
+        season_stat_id = stat_season.get("id")
+        if season_stat_id and season_stat_id in processed_season_stat_ids:
+            continue
+        processed_season_stat_ids.add(season_stat_id)
+        
+        for detail in stat_season.get("details", []):
+            stat_name = detail.get("type", {}).get("name", "Unknown Stat")
+            val_obj = detail.get("value")
+            val = val_obj.get("total") if isinstance(val_obj, dict) else val_obj
+            if stat_name and val is not None:
+                try:
+                    stats_dict[stat_name] = stats_dict.get(stat_name, 0.0) + float(val)
+                except (ValueError, TypeError):
+                    pass
+
+    match_stats_raw = {}
+    for lineup in player.get("lineups", []):
+        lineup_id = lineup.get("id")
+        if lineup_id and lineup_id in processed_lineup_ids:
+            continue
+        processed_lineup_ids.add(lineup_id)
+        
+        for detail in lineup.get("details", []):
+            stat_name = detail.get("type", {}).get("name", "Unknown Stat")
+            data_obj = detail.get("data")
+            val = data_obj.get("value") if isinstance(data_obj, dict) else data_obj
+            if stat_name and val is not None:
+                try:
+                    match_stats_raw.setdefault(stat_name, []).append(float(val))
+                except (ValueError, TypeError):
+                    pass
+
+    for stat_name, values in match_stats_raw.items():
+        if not values: continue
+        if "Percentage" in stat_name or "Rating" in stat_name:
+            stats_dict[stat_name] = sum(values) / len(values)
+        else:
+            stats_dict[stat_name] = stats_dict.get(stat_name, 0.0) + sum(values)
 
     pos_info = player.get("detailedposition") or player.get("position") or {}
     position_code = pos_info.get("developer_name", "UNKNOWN")
@@ -114,13 +292,16 @@ def process_player_data(player):
     # --- 1. Calculate Base Performance: ∑(Stat_i × Weight_i) ---
     bpi = calculate_bpi(position_code, stats_dict)
     
+    if bpi is None:
+        return None # Purge player due to incomplete data
+    
     # --- 2. Simulating Agent A (News & Sentiment Δ) ---
     # Δnews (e.g., -15 to +15 points based on recent news/injuries)
-    delta_news = round(random.uniform(-15.0, 15.0), 2)
+    delta_news = 0.0
     
-    # --- 3. Simulating Fit Rating (Style-to-Coach match) ---
-    # Score from 0 to 20 based on Sabău's preferred playstyle
-    fit_rating = round(random.uniform(5.0, 20.0), 2)
+    # --- 3. Agent D: The Coach's Persona Fit ---
+    # Analyzes discipline (cards/fouls) and work-rate/stamina (minutes played)
+    fit_rating = calculate_fit_rating(stats_dict)
     
     # --- 4. NEW DYNAMIC RATING FORMULA ---
     # Dynamic Rating = (∑(Stat_i × Weight_i)) + Δnews + Fit Rating
@@ -134,11 +315,11 @@ def process_player_data(player):
     complementary_factor = 1.0
     
     # Example logic: if the player is good at Aerials, and U Cluj needs Aerials
-    if TEAM_WORST_STATS.get("AERIALS_WON") and stats_dict.get("AERIALS_WON", 0) > 30:
-        complementary_factor += 0.2
+    #if TEAM_WORST_STATS.get("Aerials Won") and stats_dict.get("Aerials Won", 0) > 30:
+    #    complementary_factor += 0.2
     # If the player is a good crosser/key passer, and U Cluj needs it
-    if TEAM_WORST_STATS.get("CROSSES") and stats_dict.get("KEY_PASSES", 0) > 20:
-        complementary_factor += 0.15
+    #if TEAM_WORST_STATS.get("Total Crosses") and stats_dict.get("Key Passes", 0) > 20:
+    #    complementary_factor += 0.15
 
     # --- 7. NEW SYNERGY SCORE FORMULA ---
     # Synergy Score = (Dynamic Rating × Squad Deficit_pos) × Complementary Factor
@@ -150,6 +331,16 @@ def process_player_data(player):
         trend = "RISING"
     elif delta_news < -5.0:
         trend = "FALLING"
+        
+    # --- 8. Convert stats to Per 90 for the Dashboard Output ---
+    # This ensures your dashboard displays normalized efficiency metrics rather than misleading raw volumes.
+    p90_stats = {}
+    ninety_s = max(3.0, stats_dict.get("Minutes Played", 0) / 90.0)
+    for stat, val in stats_dict.items():
+        if "Percentage" in stat or "Rating" in stat or stat in ["Minutes Played", "Appearances", "Lineups"]:
+            p90_stats[stat] = round(val, 2)
+        else:
+            p90_stats[stat] = round(val / ninety_s, 2)
 
     return {
         "player_id": player.get("id"),
@@ -163,7 +354,7 @@ def process_player_data(player):
         "complementary_factor": round(complementary_factor, 2),
         "synergy_score": round(synergy_score, 2),
         "trend_indicator": trend,
-        "key_stats_used": stats_dict
+        "key_stats_used": p90_stats
     }
 
 # --- MAIN EXECUTION & FIREBASE UPLOAD ---
@@ -221,15 +412,23 @@ def main():
             firebase_admin.initialize_app(cred)
         
         db = firestore.client()
-        batch = db.batch()
         collection_ref = db.collection('u_dynamic_shadow_prospects')
         
-        for res in results[:2000]:
-            doc_ref = collection_ref.document(str(res['player_id']))
-            batch.set(doc_ref, res)
+        # Firestore limits batches to 500 operations. We will upload in chunks.
+        max_batch_size = 500
+        uploaded_count = 0
+        
+        for i in range(0, len(results), max_batch_size):
+            batch = db.batch()
+            chunk = results[i:i + max_batch_size]
+            for res in chunk:
+                doc_ref = collection_ref.document(str(res['player_id']))
+                batch.set(doc_ref, res)
+            batch.commit()
+            uploaded_count += len(chunk)
+            print(f"Committed batch of {len(chunk)} players...")
             
-        batch.commit()
-        print("Successfully saved new structures to Firebase!")
+        print(f"Successfully saved {uploaded_count} new structures to Firebase!")
     except Exception as e:
         print(f"\n[!] Firebase upload skipped. Error: {e}")
 
