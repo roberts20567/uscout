@@ -22,9 +22,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-firebase_cred
-
-PLAYERS
-
-games
