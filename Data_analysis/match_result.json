@@ -1,0 +1,229 @@
+{
+  "name": "U Cluj 0 - 1 CFR Cluj",
+  "players": [
+    {
+      "playerId": 240507,
+      "total": {
+        "minutesOnField": 90,
+        "passes": 30,
+        "successfulPasses": 20,
+        "gkSaves": 4,
+        "gkCleanSheets": 0,
+        "losses": 2
+      },
+      "percent": {
+        "successfulPasses": 66.6
+      }
+    },
+    {
+      "playerId": 220694,
+      "total": {
+        "minutesOnField": 90,
+        "passes": 45,
+        "successfulPasses": 35,
+        "aerialDuels": 3,
+        "aerialDuelsWon": 2,
+        "duels": 8,
+        "duelsWon": 6,
+        "interceptions": 4,
+        "crosses": 3,
+        "successfulCrosses": 0,
+        "losses": 5
+      },
+      "percent": {
+        "successfulPasses": 77.7,
+        "aerialDuelsWon": 66.6,
+        "duelsWon": 75.0,
+        "successfulCrosses": 0.0
+      }
+    },
+    {
+      "playerId": 270356,
+      "total": {
+        "minutesOnField": 90,
+        "passes": 50,
+        "successfulPasses": 45,
+        "aerialDuels": 5,
+        "aerialDuelsWon": 5,
+        "duels": 9,
+        "duelsWon": 8,
+        "interceptions": 5,
+        "clearances": 7,
+        "losses": 2
+      },
+      "percent": {
+        "successfulPasses": 90.0,
+        "aerialDuelsWon": 100.0,
+        "duelsWon": 88.8
+      }
+    },
+    {
+      "playerId": 630268,
+      "total": {
+        "minutesOnField": 90,
+        "passes": 48,
+        "successfulPasses": 40,
+        "aerialDuels": 4,
+        "aerialDuelsWon": 3,
+        "duels": 7,
+        "duelsWon": 5,
+        "interceptions": 3,
+        "clearances": 5,
+        "losses": 4
+      },
+      "percent": {
+        "successfulPasses": 83.3,
+        "aerialDuelsWon": 75.0,
+        "duelsWon": 71.4
+      }
+    },
+    {
+      "playerId": 83590,
+      "total": {
+        "minutesOnField": 90,
+        "passes": 40,
+        "successfulPasses": 28,
+        "aerialDuels": 2,
+        "aerialDuelsWon": 1,
+        "duels": 10,
+        "duelsWon": 5,
+        "interceptions": 2,
+        "crosses": 6,
+        "successfulCrosses": 0,
+        "dribbles": 4,
+        "successfulDribbles": 2,
+        "losses": 10
+      },
+      "percent": {
+        "successfulPasses": 70.0,
+        "aerialDuelsWon": 50.0,
+        "duelsWon": 50.0,
+        "successfulCrosses": 0.0
+      }
+    },
+    {
+      "playerId": 169037,
+      "total": {
+        "minutesOnField": 90,
+        "passes": 35,
+        "successfulPasses": 20,
+        "aerialDuels": 2,
+        "aerialDuelsWon": 0,
+        "duels": 12,
+        "duelsWon": 3,
+        "interceptions": 0,
+        "recoveries": 1,
+        "losses": 15
+      },
+      "percent": {
+        "successfulPasses": 57.1,
+        "aerialDuelsWon": 0.0,
+        "duelsWon": 25.0
+      }
+    },
+    {
+      "playerId": 506853,
+      "total": {
+        "minutesOnField": 75,
+        "passes": 28,
+        "successfulPasses": 15,
+        "aerialDuels": 3,
+        "aerialDuelsWon": 0,
+        "duels": 10,
+        "duelsWon": 2,
+        "interceptions": 0,
+        "recoveries": 1,
+        "losses": 12
+      },
+      "percent": {
+        "successfulPasses": 53.5,
+        "aerialDuelsWon": 0.0,
+        "duelsWon": 20.0
+      }
+    },
+    {
+      "playerId": 619309,
+      "total": {
+        "minutesOnField": 60,
+        "passes": 22,
+        "successfulPasses": 12,
+        "aerialDuels": 1,
+        "aerialDuelsWon": 0,
+        "duels": 8,
+        "duelsWon": 1,
+        "interceptions": 0,
+        "losses": 10
+      },
+      "percent": {
+        "successfulPasses": 54.5,
+        "aerialDuelsWon": 0.0,
+        "duelsWon": 12.5
+      }
+    },
+    {
+      "playerId": 526387,
+      "total": {
+        "minutesOnField": 90,
+        "passes": 18,
+        "successfulPasses": 10,
+        "aerialDuels": 2,
+        "aerialDuelsWon": 0,
+        "duels": 15,
+        "duelsWon": 2,
+        "dribbles": 6,
+        "successfulDribbles": 1,
+        "shots": 0,
+        "shotsOnTarget": 0,
+        "losses": 18
+      },
+      "percent": {
+        "successfulPasses": 55.5,
+        "aerialDuelsWon": 0.0,
+        "duelsWon": 13.3
+      }
+    },
+    {
+      "playerId": 778883,
+      "total": {
+        "minutesOnField": 60,
+        "passes": 15,
+        "successfulPasses": 8,
+        "aerialDuels": 1,
+        "aerialDuelsWon": 0,
+        "duels": 10,
+        "duelsWon": 1,
+        "crosses": 4,
+        "successfulCrosses": 0,
+        "dribbles": 4,
+        "successfulDribbles": 0,
+        "losses": 11
+      },
+      "percent": {
+        "successfulPasses": 53.3,
+        "aerialDuelsWon": 0.0,
+        "duelsWon": 10.0,
+        "successfulCrosses": 0.0
+      }
+    },
+    {
+      "playerId": 759616,
+      "total": {
+        "minutesOnField": 90,
+        "passes": 12,
+        "successfulPasses": 6,
+        "aerialDuels": 6,
+        "aerialDuelsWon": 1,
+        "duels": 14,
+        "duelsWon": 2,
+        "shots": 2,
+        "shotsOnTarget": 0,
+        "losses": 12
+      },
+      "percent": {
+        "successfulPasses": 50.0,
+        "aerialDuelsWon": 16.6,
+        "duelsWon": 14.2
+      }
+    }
+  ]
+}

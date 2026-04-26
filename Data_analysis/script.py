@@ -24,7 +24,7 @@ TARGET_SEASON_IDS = {25536, 25438, 25598} # Examples from your dataset. Set to N
 # Team Weaknesses for Complementary Factor calculation
 # Simulates Agent C's logic mapping prospect strengths to U Cluj weaknesses
 TEAM_WORST_STATS = {
-    "Saves": False,             # U Cluj's goalkeeping is shaky
+    "Saves": False,
     "Saves Insidebox": False,
     "Cleansheets": False,
     "Accurate Passes Percentage": False,
@@ -224,7 +224,7 @@ def calculate_fit_rating(stats_dict):
     if appearances > 0:
         fouls_per_game = fouls / appearances
         if fouls_per_game > 1.5:
-            penalty += 3.0  # Coach Sabău penalizes reckless foulers
+            penalty += 3.0
             
     fit_score -= penalty
     
