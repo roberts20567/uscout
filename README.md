@@ -13,23 +13,19 @@ Activate the **Heatmap** to instantly visualize the squad's positional deficits.
 
 ### ⚡ Live Synergy & Dynamic Rating Updates
 Watch player ratings update in real-time as new data flows into the system. The **Dynamic Rating** calculates a baseline performance index modified by recent news/injuries, while the **Synergy Score** dynamically adjusts based on how well the prospect's specific stats address the current squad deficits.
-![Live Updates](docs/live_updates.gif)
+![Live Updates](docs/G2.gif)
 
 ### 📰 AI Intelligence Reports
 Select any scouted prospect to view their deep profile. Our CrewAI "Sentinel" and "Matchmaker" agents generate a qualitative **Intelligence Report**, analyzing news, manager quotes, and tactical fit, providing a clear text summary of why a player is (or isn't) recommended.
-![Intelligence Report](docs/intelligence_report.gif)
+![Intelligence Report](docs/G3.gif)
 
 ### 📋 Tactical Board & Formation Modification
 Enter **Manager Mode** to modify your starting XI and experiment with different formations (e.g., 4-2-3-1, 4-3-3, 4-4-2). The board automatically maps your current roster to the selected tactical blueprint, letting you swap out underperforming players with available substitutes.
-![Formation Modification](docs/formation_modification.gif)
+![Formation Modification](docs/G4.gif)
 
 ### 🎯 Targeted Prospect Search
 Click on any underperforming player on the tactical board to initiate a targeted scout search. The system simulates a search against a database of thousands of players, filtering for the specific role and sorting the top 10 prospects by their computed Synergy Score.
-![Prospect Search](docs/prospect_search.gif)
-
-### 📂 Scouting Project Management
-Save your prospect searches into dedicated **Scouting Projects**. Easily switch between different positional upgrade projects from the sidebar to compare shortlisted targets side-by-side, monitoring their live stats and market values over time.
-![Project Selection](docs/project_selection.gif)
+![Prospect Search](docs/G5.gif)
 
 ## Technologies Used
 * **Frontend:** React 19, Vite, Tailwind CSS v4, Firebase
