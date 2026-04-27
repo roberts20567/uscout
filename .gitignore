@@ -1,2 +1,11 @@
 raw_data_sportmonks
+
+# Security / Credentials
 firebase_cred.json
+.env
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
