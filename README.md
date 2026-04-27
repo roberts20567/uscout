@@ -3,6 +3,8 @@
 ## Description
 UScout is an advanced, AI-driven football scouting and data analysis platform designed specifically for FC Universitatea Cluj. By leveraging multi-agent LLM systems and real-time match data, it analyzes team performance, identifies squad deficits, and evaluates prospective players to find the perfect synergistic fit for the team. The project features a powerful Python-based AI backend and a lightning-fast React frontend dashboard.
 
+## Try it here --> https://uscout-db.web.app/  
+
 ## Key Features Showcase
 
 ### 🗺️ Team Heatmap Analysis
