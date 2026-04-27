@@ -9,7 +9,7 @@ UScout is an advanced, AI-driven football scouting and data analysis platform de
 
 ### 🗺️ Team Heatmap Analysis
 Activate the **Heatmap** to instantly visualize the squad's positional deficits. The system assigns color-coded urgency scores (Low, Med, High) to each position based on recent match performance, helping managers immediately identify weak links that need reinforcement.
-![Team Heatmap](docs/heatmap.gif)
+![Team Heatmap](docs/G1.gif)
 
 ### ⚡ Live Synergy & Dynamic Rating Updates
 Watch player ratings update in real-time as new data flows into the system. The **Dynamic Rating** calculates a baseline performance index modified by recent news/injuries, while the **Synergy Score** dynamically adjusts based on how well the prospect's specific stats address the current squad deficits.
